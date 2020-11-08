@@ -3,6 +3,8 @@ from typing import Iterable, Dict, Any
 import requests
 from requests.models import Response
 
+from osrm.responses import RouteResponse
+
 
 def format_coords(coords) -> str:
     coords = ";".join([f"{lon},{lat}" for lat, lon in coords])
@@ -31,7 +33,9 @@ def format_request(
 
 
 class Client:
-    def __init__(self, host):
+    def __init__(self, host: str = None):
+        if host is None:
+            host = "router.project-osrm.org"
         self.host = host
 
     def request(
@@ -45,3 +49,7 @@ class Client:
         req = format_request(self.host, service, coords, options, profile, version)
         response = requests.get(req)
         return response
+
+    def route(self, coords, options=None, profile="driving", version="v1"):
+        response = self.request("route", coords, options, profile, version)
+        return RouteResponse(response)
